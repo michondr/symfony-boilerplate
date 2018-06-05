@@ -1,0 +1,41 @@
+- hosts: time_table_tweak
+  gather_facts: no
+
+  vars:
+    project_folder: my-project
+    app_path: /home/{{ ansible_user }}/{{ project_folder }}
+
+  remote_user: '{{ ansible_user }}'
+
+  handlers:
+  pre_tasks:
+  roles:
+
+  tasks:
+    - name: checkout app from git repo
+      git:
+        repo: "https://github.com/michondr/my-project"
+        dest: '{{ app_path }}'
+        clone: yes
+        force: yes
+        accept_hostkey: yes
+        update: yes
+        version: "{{ branch | default('master') }}"
+
+    - name: set .env to project
+      shell: cp /home/{{ ansible_user }}/.time_table_tweak_env {{ app_path }}/.env
+
+    - name: run composer install
+      shell: composer install --working-dir {{ app_path }}
+
+    - name: clear cache
+      shell: php {{ app_path }}/bin/console cache:clear
+
+    - name: fix directory permissions
+      file:
+        path: "{{ app_path }}/var"
+        state: directory
+        mode: 0777
+        recurse: yes
+
+  post_tasks:
