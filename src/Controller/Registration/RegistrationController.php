@@ -29,6 +29,8 @@ class RegistrationController extends Controller
      */
     public function registerAction(Request $request)
     {
+        // to be able to use logging in, visit security.yaml for more info
+
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
 
